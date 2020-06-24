@@ -243,3 +243,4 @@ dmypy.json
 .pytype/
 
 # End of https://www.toptal.com/developers/gitignore/api/flask
+/credentials.py
