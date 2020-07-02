@@ -4,6 +4,7 @@ from config import Config
 # from flask_migrate import Migrate
 # from flask_praetorian import Praetorian
 from .extensions import db, guard, migrate
+from flask_cors import CORS
 from .commands import create_demo_data, delete_demo_data
 from .routes import base
 import logging
@@ -11,6 +12,7 @@ import logging
 def create_app(**kwargs):
     app = Flask(__name__)
     #ToDo :: https://github.com/miguelgrinberg/flasky-with-celery/blob/master/app/__init__.py - Implement different configs
+    cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
     app.config.from_object(Config)
     if kwargs.get("celery"):
         init_celery(kwargs.get("celery"), app)
