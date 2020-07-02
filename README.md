@@ -1,5 +1,5 @@
 <h1 align="center">
-Whiskers Backend
+COD Tournament Backend
 </h1>
 Built with Flask. API URL: 
 
