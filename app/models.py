@@ -3,10 +3,29 @@ import  datetime
 import uuid
 
 
+class Organization(db.Model):
+    id = db.Column(db.CHAR(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = db.Column(db.String(30))
+    org_roles = db.relationship('Role', backref='organization', passive_deletes=True)
+    tournaments = db.relationship('Tournament', backref='organization', passive_deletes=True)
+
+org_roles_users = db.Table('org_roles_users',
+        db.Column('user_id', db.CHAR(36), db.ForeignKey('user.id', ondelete='CASCADE')),
+        db.Column('role_id', db.CHAR(36), db.ForeignKey('organization.id', ondelete='CASCADE')))
+
+
+class OrgRole(db.Model):
+    id = db.Column(db.CHAR(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = db.Column(db.String(80), unique=True)
+    description = db.Column(db.String(255))
+    type = db.Column(db.String(10), unique=False)
+    organization_id = db.Column(db.CHAR(36), db.ForeignKey('organization.id', ondelete='CASCADE'))
+
 class Tournament(db.Model):
     id = db.Column(db.CHAR(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(30))
     roles = db.relationship('Role', backref='tournament', passive_deletes=True)
+    organization_id = db.Column(db.CHAR(36), db.ForeignKey('organization.id', ondelete='CASCADE'))
 
 
 roles_users = db.Table('roles_users',
@@ -37,6 +56,9 @@ class User(db.Model):
     account_verified = db.Column(db.Boolean, default=False)
     roles = db.relationship('Role',
                             secondary=roles_users,
+                            backref=db.backref('users', lazy='dynamic'))
+    organization_roles = db.relationship('Organizations',
+                            secondary=org_roles_users,
                             backref=db.backref('users', lazy='dynamic'))
     is_active = db.Column(db.Boolean, default=True)
     otp = db.relationship('UserOTP', backref='user', passive_deletes=True)
@@ -73,7 +95,7 @@ class User(db.Model):
             return role_list
         else:
             for role in self.roles:
-                if role.type == 'organizers':
+                if role.type == 'organizer':
                     role_list.append(role.tournament_id)
             return role_list
 
@@ -84,9 +106,31 @@ class User(db.Model):
             return role_list
         else:
             for role in self.roles:
-                if role.type == 'participants':
+                if role.type == 'participant':
                     role_list.append(role.tournament_id)
             return role_list
+
+    @property
+    def admin_of_orgs(self):
+        role_list = []
+        if len(self.organization_roles) == 0:
+            return role_list
+        else:
+            for role in self.roles:
+                if role.type == 'admin':
+                    role_list.append(role.organization_id)
+            return role_list
+
+    @property
+    def user_of_orgs(self):
+        org_list = []
+        if len(self.organization_roles) == 0:
+            return org_list
+        else:
+            for role in self.roles:
+                if role.type == 'user':
+                    org_list.append(role.organization_id)
+            return org_list
 
 
 class UserOTP(db.Model):
@@ -105,19 +149,30 @@ class UserOTP(db.Model):
 
 
 
-
 # Events
 @db.event.listens_for(Tournament, "after_insert")
 def create_roles_for_tournament(mapper, connection, target):
     role = Role.__table__
     connection.execute(role.insert().values(name="{}-participants".format(target.id),
                                             description="{} - Participants".format(target.name),
-                                            type="participants",
+                                            type="participant",
                                             tournament_id=target.id))
     connection.execute(role.insert().values(name="{}-organizers".format(target.id),
                                             description="{} - Organizers".format(target.name),
-                                            type="organizers",
+                                            type="organizer",
                                             tournament_id=target.id))
+
+@db.event.listens_for(Organization, "after_insert")
+def create_roles_for_tournament(mapper, connection, target):
+    role = Role.__table__
+    connection.execute(role.insert().values(name="{}-users".format(target.id),
+                                            description="{} - Users".format(target.name),
+                                            type="user",
+                                            organization_id=target.id))
+    connection.execute(role.insert().values(name="{}-admins".format(target.id),
+                                            description="{} - Admins".format(target.name),
+                                            type="admin",
+                                            organization_id=target.id))
 
 
 
