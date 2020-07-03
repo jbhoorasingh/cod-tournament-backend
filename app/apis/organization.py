@@ -62,9 +62,7 @@ class OrganizationList(Resource):
 
 
 @api.route("/<id>")
-@api.param("id", "The o"
-                 "'.'"
-                 ".;rganization identifier")
+@api.param("id", "The organization identifier")
 @api.response(404, "Organization not found")
 class Organization(Resource):
     @api.doc("get_organization")
