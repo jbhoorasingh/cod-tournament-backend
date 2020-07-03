@@ -6,7 +6,7 @@ import uuid
 class Organization(db.Model):
     id = db.Column(db.CHAR(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(30))
-    org_roles = db.relationship('Role', backref='organization', passive_deletes=True)
+    org_roles = db.relationship('OrgRole', backref='organization', passive_deletes=True)
     tournaments = db.relationship('Tournament', backref='organization', passive_deletes=True)
 
 org_roles_users = db.Table('org_roles_users',
@@ -57,7 +57,7 @@ class User(db.Model):
     roles = db.relationship('Role',
                             secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
-    organization_roles = db.relationship('Organizations',
+    organization_roles = db.relationship('Organization',
                             secondary=org_roles_users,
                             backref=db.backref('users', lazy='dynamic'))
     is_active = db.Column(db.Boolean, default=True)

@@ -16,6 +16,10 @@ user = api.model(
         "lastname": fields.String(required=True, description="The user last name"),
         "username": fields.String(required=True, description="The user email/username"),
         "gender": fields.String(required=True, description="The user gender"),
+        "activision_id": fields.String(required=True, description="The user gender"),
+        "stream_type": fields.String(required=True, description="The user gender"),
+        "stream_url": fields.String(required=True, description="The user gender"),
+        "avatar_url": fields.String(required=True, description="The user gender"),
         "dob": fields.Date(required=False, description="The user date of birth"),
         "registration_date": fields.DateTime(required=False, description="The user date of registration"),
     },
@@ -65,19 +69,10 @@ class CurrentUser(Resource):
             api.abort(500, "Failed to add user to database")
 
         otp_code = random_generator()
-        # Send verification email
-        #email = emails.send_verification_email(u.firstname, u.username, otp_code)
+
         print(otp_code)
-        email = task_send_verification_email.delay(u.firstname, u.username, u.id, otp_code)
-        print(email)
-        #print(email)
-        # generate OTP
-        # otp = models.UserOTP(code="TEST", user=u, sg_message_id=email['message_id'], type='first')
-        # db.session.add(otp)
-        # try:
-        #     db.session.commit()
-        # except:
-        #     db.session.rollback()
-        #     api.abort(500, "Failed to create otp")
+        # email = task_send_verification_email.delay(u.firstname, u.username, u.id, otp_code)
+        # print(email)
+
 
         return u
