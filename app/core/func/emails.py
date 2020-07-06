@@ -14,7 +14,7 @@ def send_verification_email(firstname, email, verification_code):
     result = {}
     try:
         sg = SendGridAPIClient(SENDGRID_API_KEY)
-        #sg = SendGridAPIClient('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')
+
         response = sg.send(message)
         if response.status_code != 202:
             result['status'] = 'fail'
