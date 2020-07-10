@@ -11,7 +11,7 @@ class Organization(db.Model):
 
 org_roles_users = db.Table('org_roles_users',
         db.Column('user_id', db.CHAR(36), db.ForeignKey('user.id', ondelete='CASCADE')),
-        db.Column('role_id', db.CHAR(36), db.ForeignKey('organization.id', ondelete='CASCADE')))
+        db.Column('role_id', db.CHAR(36), db.ForeignKey('org_role.id', ondelete='CASCADE')))
 
 
 class OrgRole(db.Model):
@@ -57,7 +57,7 @@ class User(db.Model):
     roles = db.relationship('Role',
                             secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
-    organization_roles = db.relationship('Organization',
+    organization_roles = db.relationship('OrgRole',
                             secondary=org_roles_users,
                             backref=db.backref('users', lazy='dynamic'))
     is_active = db.Column(db.Boolean, default=True)
@@ -116,7 +116,7 @@ class User(db.Model):
         if len(self.organization_roles) == 0:
             return role_list
         else:
-            for role in self.roles:
+            for role in self.organization_roles:
                 if role.type == 'admin':
                     role_list.append(role.organization_id)
             return role_list
@@ -163,8 +163,8 @@ def create_roles_for_tournament(mapper, connection, target):
                                             tournament_id=target.id))
 
 @db.event.listens_for(Organization, "after_insert")
-def create_roles_for_tournament(mapper, connection, target):
-    role = Role.__table__
+def create_roles_for_organization(mapper, connection, target):
+    role = OrgRole.__table__
     connection.execute(role.insert().values(name="{}-users".format(target.id),
                                             description="{} - Users".format(target.name),
                                             type="user",
