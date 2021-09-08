@@ -13,7 +13,7 @@ Flask-Mail==0.9.1
 flask-marshmallow==0.11.0
 Flask-Migrate==2.5.3
 flask-praetorian==1.0.0
-flask-restx==0.2.0
+flask-restx==0.5.1
 Flask-SQLAlchemy==2.4.1
 flower==0.9.4
 humanize==0.5.1
