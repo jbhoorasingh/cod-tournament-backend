@@ -30,7 +30,7 @@ marshmallow-sqlalchemy==0.22.3
 passlib==1.7.2
 pendulum==2.1.0
 py-buzz==1.0.3
-PyJWT==1.7.1
+PyJWT==2.4.0
 PyMySQL==0.9.3
 pyrsistent==0.16.0
 python-dateutil==2.8.1
